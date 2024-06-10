@@ -1,13 +1,21 @@
 package com.example.budgetcalculator
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -16,6 +24,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
@@ -24,7 +33,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.budgetcalculator.ui.theme.BlueGrotto
 import com.example.budgetcalculator.ui.theme.LightGreen1
 import com.example.budgetcalculator.ui.theme.LightGrey
 import com.example.budgetcalculator.ui.theme.RoseRed
@@ -33,10 +41,7 @@ import com.example.budgetcalculator.ui.theme.TextWhite
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen() {
-
-    var totalIncome by remember { mutableDoubleStateOf(0.0) }
-    var totalExpense by remember { mutableDoubleStateOf(0.0) }
-
+    val budgetData by remember { mutableStateOf(BudgetData()) }
 
     Scaffold(topBar = {
         TopAppBar(title = {
@@ -46,7 +51,7 @@ fun HomeScreen() {
                 Text(
                     text = APP_NAME,
                     style = TextStyle(
-                        fontSize = 30.sp, color = BlueGrotto, fontWeight = FontWeight.Bold
+                        fontSize = 30.sp, color = Color.Black, fontWeight = FontWeight.Bold
                     ),
                 )
             }
@@ -56,59 +61,81 @@ fun HomeScreen() {
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(top = 100.dp)
+            modifier = Modifier.padding(top = 60.dp)
         ) {
-            IncomeInput(onIncomeChange = { totalIncome = it })
-            Spacer(modifier = Modifier.height(16.dp))
-            ExpenseInput(onExpenseChange = { totalExpense = it })
-            Spacer(modifier = Modifier.height(16.dp))
+            Row(modifier = Modifier.padding(horizontal = 16.dp)) {
+                IncomeInput(budgetData = budgetData)
+                Spacer(modifier = Modifier.weight(1f))
+                ExpenseInput(budgetData = budgetData)
+            }
+            BudgetDashboard(budgetData = budgetData)
+            Spacer(modifier = Modifier.weight(1f))
             BudgetResult(
-                totalIncome,
-                totalExpense,
-                onIncomeChange = { totalIncome = it },
-                onExpenseChange = { totalExpense = it })
-
+                onClear = {
+                    budgetData.newIncome.doubleValue = 0.0
+                    budgetData.newExpense.doubleValue = 0.0
+                    budgetData.incomeList.clear()
+                    budgetData.expenseList.clear()
+                },
+                budgetData = budgetData
+            )
         }
     }
 }
 
 @Composable
-fun IncomeInput(onIncomeChange: (Double) -> Unit) {
+fun IncomeInput(budgetData: BudgetData) {
     var incomeText by remember { mutableStateOf(EMPTY_STRING) }
-    var income by remember { mutableDoubleStateOf(0.0) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         OutlinedTextField(
             value = incomeText,
             onValueChange = { text ->
                 incomeText = text
+
             },
-            label = { Text("Income", color = LightGreen1) },
+            textStyle = TextStyle(
+                fontSize = 16.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
+            ),
+            label = {
+                Text(
+                    text = "Income",
+                    textAlign = TextAlign.Start,
+                    color = LightGreen1
+                )
+            },
             modifier = Modifier
-                .padding(vertical = 10.dp, horizontal = 10.dp)
-                .width(200.dp),
+                .padding(10.dp)
+                .width(150.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = Color.Black,
                 cursorColor = LightGreen1,
                 focusedBorderColor = LightGreen1,
-                unfocusedBorderColor = Color.Black
+                unfocusedBorderColor = LightGreen1
             )
         )
         Button(
             onClick = {
-                income = incomeText.toDoubleOrNull()?.plus(income) ?: 0.0
-                onIncomeChange(income)
+                val newIncomeValue = incomeText.toDoubleOrNull() ?: 0.0
+                budgetData.newIncome.doubleValue += newIncomeValue
+                budgetData.incomeList.add(newIncomeValue)
                 incomeText = EMPTY_STRING
                 keyboardController?.hide()
             },
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(LightGreen1, TextWhite, LightGrey, Color.Black)
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = LightGreen1,
+                contentColor = TextWhite,
+                disabledContainerColor = LightGrey,
+                disabledContentColor = Color.Black
+            )
         ) {
             Text(text = "Add")
         }
@@ -116,40 +143,51 @@ fun IncomeInput(onIncomeChange: (Double) -> Unit) {
 }
 
 @Composable
-fun ExpenseInput(onExpenseChange: (Double) -> Unit) {
+fun ExpenseInput(budgetData: BudgetData) {
     var expenseText by remember { mutableStateOf(EMPTY_STRING) }
-    var expense by remember { mutableDoubleStateOf(0.0) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         OutlinedTextField(
             value = expenseText,
             onValueChange = { text ->
                 expenseText = text
             },
-            label = { Text("Expense", color = RoseRed) },
+            textStyle = TextStyle(
+                fontSize = 16.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
+            ),
+            label = {
+                Text(
+                    text = "Expense",
+                    textAlign = TextAlign.Start,
+                    color = RoseRed
+                )
+            },
             modifier = Modifier
-                .padding(vertical = 10.dp, horizontal = 10.dp)
-                .width(200.dp),
+                .padding(10.dp)
+                .width(150.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = Color.Black,
                 cursorColor = RoseRed,
                 focusedBorderColor = RoseRed,
-                unfocusedBorderColor = Color.Black
+                unfocusedBorderColor = RoseRed
             )
         )
         Button(
             onClick = {
-                expense = expenseText.toDoubleOrNull()?.plus(expense) ?: 0.0
-                onExpenseChange(expense)
+                val newExpenseValue = expenseText.toDoubleOrNull() ?: 0.0
+                budgetData.newExpense.doubleValue += newExpenseValue
+                budgetData.expenseList.add(newExpenseValue)
                 expenseText = EMPTY_STRING
                 keyboardController?.hide()
             },
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(RoseRed, TextWhite, LightGrey, Color.Black)
         ) {
             Text(text = "Add")
@@ -158,14 +196,100 @@ fun ExpenseInput(onExpenseChange: (Double) -> Unit) {
 }
 
 @Composable
-fun BudgetResult(
-    totalIncome: Double,
-    totalExpense: Double,
-    onIncomeChange: (Double) -> Unit,
-    onExpenseChange: (Double) -> Unit,
-) {
-    val budget = totalIncome - totalExpense
+fun BudgetDashboard(budgetData: BudgetData) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(330.dp)
+            .padding(20.dp)
+            .border(
+                brush = Brush.horizontalGradient(listOf(LightGreen1, RoseRed)),
+                width = 1.dp,
+                shape = RoundedCornerShape(8.dp)
+            )
+    ) {
+        Row(Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .wrapContentHeight()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                budgetData.incomeList.forEach {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(5.dp)
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp)
+                        ) {
+                            Text(text = it.toString())
+                            IconButton(onClick = {
+                                budgetData.incomeList.remove(it)
+                                budgetData.newIncome.doubleValue -= it
+                            }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Clear,
+                                    contentDescription = "Cross Button",
+                                    tint = Color.Black
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            Column(
+                Modifier
+                    .height(330.dp)
+                    .background(color = Color.Black)
+                    .width(1.dp)
+            ) {}
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .wrapContentHeight()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                budgetData.expenseList.forEach {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(5.dp)
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp)
+                        ) {
+                            Text(text = it.toString())
+                            IconButton(onClick = {
+                                budgetData.expenseList.remove(it)
+                                budgetData.newExpense.doubleValue -= it
+                            }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Clear,
+                                    contentDescription = "Cross Button",
+                                    tint = Color.Black
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
+@Composable
+fun BudgetResult(
+    onClear: () -> Unit,
+    budgetData: BudgetData,
+) {
     Box(
         contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()
     ) {
@@ -194,7 +318,7 @@ fun BudgetResult(
                         modifier = Modifier.padding(0.dp, 20.dp, 0.dp, 10.dp)
                     )
                     Text(
-                        text = "₹$totalIncome",
+                        text = "₹${budgetData.newIncome.doubleValue}",
                         fontSize = 20.sp,
                         color = LightGreen1,
                         textAlign = TextAlign.End,
@@ -216,7 +340,7 @@ fun BudgetResult(
                         modifier = Modifier.padding(0.dp, 20.dp, 0.dp, 10.dp)
                     )
                     Text(
-                        text = "₹$totalExpense",
+                        text = "₹${budgetData.newExpense.doubleValue}",
                         fontSize = 20.sp,
                         color = RoseRed,
                         textAlign = TextAlign.End,
@@ -238,7 +362,7 @@ fun BudgetResult(
                         modifier = Modifier.padding(0.dp, 20.dp, 0.dp, 10.dp)
                     )
                     Text(
-                        text = "₹$budget",
+                        text = "₹${budgetData.newIncome.doubleValue - budgetData.newExpense.doubleValue}",
                         fontSize = 20.sp,
                         textAlign = TextAlign.End,
                         style = TextStyle(fontWeight = FontWeight.Bold),
@@ -248,19 +372,16 @@ fun BudgetResult(
 
                 Box(modifier = Modifier.padding(40.dp, 20.dp, 40.dp, 20.dp)) {
                     Button(
-                        onClick = {
-                            onIncomeChange(0.0)
-                            onExpenseChange(0.0)
-                        },
+                        onClick = onClear,
                         shape = RoundedCornerShape(50.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
                         colors = ButtonDefaults.buttonColors(
-                            Color.Black,
-                            TextWhite,
-                            Color.Black,
-                            TextWhite
+                            containerColor = Color.Black,
+                            contentColor = TextWhite,
+                            disabledContainerColor = Color.Black,
+                            disabledContentColor = TextWhite
                         )
                     ) {
                         Text(text = "Clear All")
