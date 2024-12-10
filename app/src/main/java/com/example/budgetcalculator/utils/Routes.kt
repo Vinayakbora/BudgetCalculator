@@ -1,4 +1,4 @@
-package com.example.budgetcalculator
+package com.example.budgetcalculator.utils
 
 sealed class Routes(val route: String) {
 

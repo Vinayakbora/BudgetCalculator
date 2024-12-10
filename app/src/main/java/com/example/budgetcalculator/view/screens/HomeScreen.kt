@@ -1,4 +1,4 @@
-package com.example.budgetcalculator
+package com.example.budgetcalculator.view.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,6 +21,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,8 +34,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.budgetcalculator.model.BudgetData
+import com.example.budgetcalculator.ui.theme.APP_NAME
+import com.example.budgetcalculator.ui.theme.Aztec
+import com.example.budgetcalculator.ui.theme.EMPTY_STRING
+import com.example.budgetcalculator.ui.theme.Juniper
 import com.example.budgetcalculator.ui.theme.LightGreen1
 import com.example.budgetcalculator.ui.theme.LightGrey
+import com.example.budgetcalculator.ui.theme.LightRed
+import com.example.budgetcalculator.ui.theme.MintTulip
 import com.example.budgetcalculator.ui.theme.RoseRed
 import com.example.budgetcalculator.ui.theme.TextWhite
 
@@ -42,26 +50,37 @@ import com.example.budgetcalculator.ui.theme.TextWhite
 @Composable
 fun HomeScreen() {
     val budgetData by remember { mutableStateOf(BudgetData()) }
-
     Scaffold(topBar = {
-        TopAppBar(title = {
-            Row(
-                horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = APP_NAME,
-                    style = TextStyle(
-                        fontSize = 30.sp, color = Color.Black, fontWeight = FontWeight.Bold
-                    ),
-                )
-            }
-        })
+        TopAppBar(
+            title = {
+                Row(
+                    horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = APP_NAME,
+                        color = Juniper,
+                        style = TextStyle(
+                            fontSize = 30.sp, color = Color.Black, fontWeight = FontWeight.Bold
+                        ),
+                    )
+                }
+            },
+            colors = TopAppBarColors(
+                containerColor = Aztec,
+                scrolledContainerColor = Aztec,
+                navigationIconContentColor = Aztec,
+                titleContentColor = Juniper,
+                actionIconContentColor = Aztec
+            )
+        )
     }) { paddingValues ->
         paddingValues.calculateTopPadding()
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(top = 60.dp)
+            modifier = Modifier
+                .padding(top = 60.dp)
+                .background(color = Aztec)
         ) {
             Row(modifier = Modifier.padding(horizontal = 16.dp)) {
                 IncomeInput(budgetData = budgetData)
@@ -96,7 +115,6 @@ fun IncomeInput(budgetData: BudgetData) {
             value = incomeText,
             onValueChange = { text ->
                 incomeText = text
-
             },
             textStyle = TextStyle(
                 fontSize = 16.sp,
@@ -132,7 +150,7 @@ fun IncomeInput(budgetData: BudgetData) {
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = LightGreen1,
-                contentColor = TextWhite,
+                contentColor = Aztec,
                 disabledContainerColor = LightGrey,
                 disabledContentColor = Color.Black
             )
@@ -165,7 +183,7 @@ fun ExpenseInput(budgetData: BudgetData) {
                 Text(
                     text = "Expense",
                     textAlign = TextAlign.Start,
-                    color = RoseRed
+                    color = LightRed
                 )
             },
             modifier = Modifier
@@ -174,9 +192,9 @@ fun ExpenseInput(budgetData: BudgetData) {
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = Color.Black,
-                cursorColor = RoseRed,
-                focusedBorderColor = RoseRed,
-                unfocusedBorderColor = RoseRed
+                cursorColor = LightRed,
+                focusedBorderColor = LightRed,
+                unfocusedBorderColor = LightRed
             )
         )
         Button(
@@ -188,7 +206,7 @@ fun ExpenseInput(budgetData: BudgetData) {
                 keyboardController?.hide()
             },
             shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(RoseRed, TextWhite, LightGrey, Color.Black)
+            colors = ButtonDefaults.buttonColors(LightRed, Aztec, LightGrey, Aztec)
         ) {
             Text(text = "Add")
         }
@@ -200,7 +218,7 @@ fun BudgetDashboard(budgetData: BudgetData) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(330.dp)
+            .height(400.dp)
             .padding(20.dp)
             .border(
                 brush = Brush.horizontalGradient(listOf(LightGreen1, RoseRed)),
@@ -224,7 +242,9 @@ fun BudgetDashboard(budgetData: BudgetData) {
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 5.dp)
                         ) {
                             Text(text = it.toString())
                             IconButton(onClick = {
@@ -244,9 +264,9 @@ fun BudgetDashboard(budgetData: BudgetData) {
             }
             Column(
                 Modifier
-                    .height(330.dp)
-                    .background(color = Color.Black)
-                    .width(1.dp)
+                    .fillMaxHeight()
+                    .background(brush = Brush.horizontalGradient(listOf(LightGreen1, RoseRed)))
+                    .width(2.dp)
             ) {}
             Column(
                 modifier = Modifier
@@ -263,7 +283,9 @@ fun BudgetDashboard(budgetData: BudgetData) {
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 5.dp)
                         ) {
                             Text(text = it.toString())
                             IconButton(onClick = {
@@ -300,7 +322,7 @@ fun BudgetResult(
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(16.dp),
-            colors = CardDefaults.cardColors(TextWhite, Color.Black, TextWhite, Color.Black)
+            colors = CardDefaults.cardColors(MintTulip, Aztec, MintTulip, Aztec)
 
         ) {
             Column {
@@ -320,7 +342,7 @@ fun BudgetResult(
                     Text(
                         text = "₹${budgetData.newIncome.doubleValue}",
                         fontSize = 20.sp,
-                        color = LightGreen1,
+                        color = Juniper,
                         textAlign = TextAlign.End,
                         style = TextStyle(fontWeight = FontWeight.Bold),
                         modifier = Modifier.padding(0.dp, 20.dp, 0.dp, 10.dp)
@@ -340,9 +362,9 @@ fun BudgetResult(
                         modifier = Modifier.padding(0.dp, 20.dp, 0.dp, 10.dp)
                     )
                     Text(
-                        text = "₹${budgetData.newExpense.doubleValue}",
+                        text = "-₹${budgetData.newExpense.doubleValue}",
                         fontSize = 20.sp,
-                        color = RoseRed,
+                        color = Juniper,
                         textAlign = TextAlign.End,
                         style = TextStyle(fontWeight = FontWeight.Bold),
                         modifier = Modifier.padding(0.dp, 20.dp, 0.dp, 10.dp)

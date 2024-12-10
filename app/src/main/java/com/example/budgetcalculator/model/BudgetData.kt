@@ -1,4 +1,4 @@
-package com.example.budgetcalculator
+package com.example.budgetcalculator.model
 
 import androidx.compose.runtime.MutableDoubleState
 import androidx.compose.runtime.mutableDoubleStateOf
