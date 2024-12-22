@@ -1,21 +1,12 @@
 package com.example.budgetcalculator.view.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -25,7 +16,6 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
@@ -43,8 +33,8 @@ import com.example.budgetcalculator.ui.theme.LightGreen1
 import com.example.budgetcalculator.ui.theme.LightGrey
 import com.example.budgetcalculator.ui.theme.LightRed
 import com.example.budgetcalculator.ui.theme.MintTulip
-import com.example.budgetcalculator.ui.theme.RoseRed
-import com.example.budgetcalculator.ui.theme.TextWhite
+import com.example.budgetcalculator.view.widgets.BudgetDashboard
+import com.example.budgetcalculator.view.widgets.BudgetResult
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,12 +64,15 @@ fun HomeScreen() {
             )
         )
     }) { paddingValues ->
-        paddingValues.calculateTopPadding()
         Column(
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .padding(top = 60.dp)
+                .fillMaxSize()
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    bottom = paddingValues.calculateBottomPadding()
+                )
                 .background(color = Aztec)
         ) {
             Row(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -118,7 +111,7 @@ fun IncomeInput(budgetData: BudgetData) {
             },
             textStyle = TextStyle(
                 fontSize = 16.sp,
-                color = Color.Black,
+                color = MintTulip,
                 fontWeight = FontWeight.Bold
             ),
             label = {
@@ -133,7 +126,7 @@ fun IncomeInput(budgetData: BudgetData) {
                 .width(150.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.Black,
+                focusedTextColor = MintTulip,
                 cursorColor = LightGreen1,
                 focusedBorderColor = LightGreen1,
                 unfocusedBorderColor = LightGreen1
@@ -176,7 +169,7 @@ fun ExpenseInput(budgetData: BudgetData) {
             },
             textStyle = TextStyle(
                 fontSize = 16.sp,
-                color = Color.Black,
+                color = MintTulip,
                 fontWeight = FontWeight.Bold
             ),
             label = {
@@ -191,7 +184,7 @@ fun ExpenseInput(budgetData: BudgetData) {
                 .width(150.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.Black,
+                focusedTextColor = MintTulip,
                 cursorColor = LightRed,
                 focusedBorderColor = LightRed,
                 unfocusedBorderColor = LightRed
@@ -213,204 +206,6 @@ fun ExpenseInput(budgetData: BudgetData) {
     }
 }
 
-@Composable
-fun BudgetDashboard(budgetData: BudgetData) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(400.dp)
-            .padding(20.dp)
-            .border(
-                brush = Brush.horizontalGradient(listOf(LightGreen1, RoseRed)),
-                width = 1.dp,
-                shape = RoundedCornerShape(8.dp)
-            )
-    ) {
-        Row(Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .wrapContentHeight()
-                    .verticalScroll(rememberScrollState())
-            ) {
-                budgetData.incomeList.forEach {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(5.dp)
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 5.dp)
-                        ) {
-                            Text(text = it.toString())
-                            IconButton(onClick = {
-                                budgetData.incomeList.remove(it)
-                                budgetData.newIncome.doubleValue -= it
-                            }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Clear,
-                                    contentDescription = "Cross Button",
-                                    tint = Color.Black
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            Column(
-                Modifier
-                    .fillMaxHeight()
-                    .background(brush = Brush.horizontalGradient(listOf(LightGreen1, RoseRed)))
-                    .width(2.dp)
-            ) {}
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .wrapContentHeight()
-                    .verticalScroll(rememberScrollState())
-            ) {
-                budgetData.expenseList.forEach {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(5.dp)
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 5.dp)
-                        ) {
-                            Text(text = it.toString())
-                            IconButton(onClick = {
-                                budgetData.expenseList.remove(it)
-                                budgetData.newExpense.doubleValue -= it
-                            }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Clear,
-                                    contentDescription = "Cross Button",
-                                    tint = Color.Black
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
-@Composable
-fun BudgetResult(
-    onClear: () -> Unit,
-    budgetData: BudgetData,
-) {
-    Box(
-        contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()
-    ) {
-        Card(
-            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-            shape = RoundedCornerShape(30.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(MintTulip, Aztec, MintTulip, Aztec)
 
-        ) {
-            Column {
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Total Income: ",
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Start,
-                        style = TextStyle(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(0.dp, 20.dp, 0.dp, 10.dp)
-                    )
-                    Text(
-                        text = "₹${budgetData.newIncome.doubleValue}",
-                        fontSize = 20.sp,
-                        color = Juniper,
-                        textAlign = TextAlign.End,
-                        style = TextStyle(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(0.dp, 20.dp, 0.dp, 10.dp)
-                    )
-                }
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Total Expense: ",
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Start,
-                        style = TextStyle(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(0.dp, 20.dp, 0.dp, 10.dp)
-                    )
-                    Text(
-                        text = "-₹${budgetData.newExpense.doubleValue}",
-                        fontSize = 20.sp,
-                        color = Juniper,
-                        textAlign = TextAlign.End,
-                        style = TextStyle(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(0.dp, 20.dp, 0.dp, 10.dp)
-                    )
-                }
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Total Budget: ",
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Start,
-                        style = TextStyle(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(0.dp, 20.dp, 0.dp, 10.dp)
-                    )
-                    Text(
-                        text = "₹${budgetData.newIncome.doubleValue - budgetData.newExpense.doubleValue}",
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.End,
-                        style = TextStyle(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(0.dp, 20.dp, 0.dp, 10.dp)
-                    )
-                }
-
-                Box(modifier = Modifier.padding(40.dp, 20.dp, 40.dp, 20.dp)) {
-                    Button(
-                        onClick = onClear,
-                        shape = RoundedCornerShape(50.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Black,
-                            contentColor = TextWhite,
-                            disabledContainerColor = Color.Black,
-                            disabledContentColor = TextWhite
-                        )
-                    ) {
-                        Text(text = "Clear All")
-                    }
-                }
-            }
-        }
-    }
-}
 
